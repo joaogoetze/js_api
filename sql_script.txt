@@ -1,0 +1,4 @@
+create table cars (
+car_id SERIAL NOT NULL PRIMARY KEY,
+car_name VARCHAR(30) NOT NULL
+)
