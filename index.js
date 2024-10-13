@@ -1,12 +1,16 @@
 import express from 'express';
 const app = express();
 
-import dotevn from 'dotenv';
-dotevn.config();
+import dotenv from 'dotenv';
+dotenv.config();
+
+import carRoutes from './routes.js';
 
 app.use(express.json());
 
-const PORT = process.env.DB_PORT;
+app.use('/api', carRoutes);
+
+const PORT = 3000;
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
