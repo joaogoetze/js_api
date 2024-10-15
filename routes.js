@@ -8,17 +8,36 @@ router.get('/', (req, res) => {
 import pool from './db.js';
 
 
-router.get('/getCars', (req, res) =>{
-    pool.query('SELECT * FROM cars', (err, res) => {
-        if(err)
+router.get('/readCars', (req, res) => {
+    pool.query('SELECT * FROM cars', (db_err, db_res) => {
+        if(db_err)
         {
-            console.error("Error: ", err);
+            console.error("Error: ", db_err);
+            res.json(db_err.rows);
         }
         else
         {
-            console.log('Resultado:', res.rows);
+            console.log('Resultado:', db_res.rows);
+            res.json(db_res.rows);
         }
     });
+});
+
+router.post('/createCars', (req, res) => {
+    const { car_name } = req.body;
+    pool.query('INSERT INTO cars (car_name) VALUES ($1) RETURNING *', [car_name], (db_err, db_res) => {
+        if(db_err)
+        {
+            console.error("Error: ", db_err);
+            res.json(db_err.rows);
+        }
+        else
+        {
+            console.log('Resultado:', db_res.rows[0]);
+            res.json(db_res.rows[0]);
+        }
+    });
+
 });
 
 
