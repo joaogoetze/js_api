@@ -82,5 +82,25 @@ router.delete('/deleteCar/:car_id', (req, res) => {
     });
 });
 
+router.put('/updateCar/:car_id', (req, res) => {
+    const { car_id } = req.params;
+    const { car_name } = req.body;
+    pool.query('UPDATE cars SET car_name = $1 WHERE car_id = $2 RETURNING *', [car_name, car_id], (db_err, db_res) => {
+        if(db_err) 
+        {
+            console.error("Error: ", db_err);
+            res.status(500).json({error: 'Database error'});
+        }
+        else if(db_res.rows.length === 0)
+        {
+            res.status(404).json({message: 'Car not found' });
+        }
+        else
+        {
+            console.log('Result:', db_res.rows[0]);
+            res.json(db_res.rows[0]);
+        }
+    });
+});
 
 export default router;
