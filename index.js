@@ -4,7 +4,7 @@ const app = express();
 import dotenv from 'dotenv';
 dotenv.config();
 
-import carRoutes from './routes.js';
+import carRoutes from './routes/routes.js';
 
 app.use(express.json());
 
