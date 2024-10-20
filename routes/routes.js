@@ -3,26 +3,33 @@ import express from 'express';
 const router = express.Router();
 
 // Rota padrão
-router.get('/', (req, res) => {
+router.get('/', (res) => {
     res.send("Hello World");
 });
 
 // Rota para criar
 router.post('/createCar', (req, res) => {
     // Pega o parâmetro que veio no JSON da requisição
-    const { car_name } = req.body;
-    pool.query('INSERT INTO cars (car_name) VALUES ($1) RETURNING *', [car_name], (db_err, db_res) => {
-        if(db_err)
-        {
-            console.error("Error: ", db_err);
-            res.json(db_err.rows);
-        }
-        else
-        {
-            console.log('Resultado:', db_res.rows[0]);
-            res.json(db_res.rows[0]);
-        }
-    });
+    const { car_name, marca } = req.body;
+    if(car_name == null || car_name.trim() === '')
+    {
+        res.status(500).json({error: 'car_name was not given'});
+    }
+    else
+    {
+        pool.query('INSERT INTO cars (car_name, marca) VALUES ($1, $2) RETURNING *', [car_name, marca], (db_err, db_res) => {
+            if(db_err)
+            {   
+                console.error("Error: ", db_err);
+                res.status(500).json({error: 'Database error'});   
+            }
+            else
+            {
+                console.log('Resultado:', db_res.rows[0]);
+                res.json(db_res.rows[0]);
+            }
+        });
+    }
 });
 
 // Rota para ler
@@ -49,6 +56,11 @@ router.get('/readCar/:car_id', (req, res) => {
     pool.query('SELECT * FROM cars WHERE car_id = $1', [car_id], (db_err, db_res) => {
         if (db_err) 
         {
+            if(car_id == null)
+            {
+                res.status(500).json({error: "car_id was not given"});
+                console.error("Error", db_err);
+            }
             console.error("Error: ", db_err);
             res.status(500).json({ error: 'Database error' });
         } 
@@ -73,39 +85,48 @@ router.put('/updateCar/:car_id', (req, res) => {
     //JSON
     const { car_name, marca } = req.body;
 
-    // Verifica se o item existe, se existir, pega as informações dele
-    pool.query('SELECT * FROM cars WHERE car_id = $1', [car_id], (db_err, db_res) => {
-        if (db_err) 
-        {
-            console.error("Error: ", db_err);
-            res.status(500).json({ error: 'Database error' });
-        }
-        if (db_res.rows.length === 0) 
-        {
-            res.status(404).json({ message: 'Car not found' });
-            console.log(car_id);
-        } 
-        
-        // Pega o nome e marca do carro que estão no banco
-        const currentCarName = db_res.rows[0].car_name;
-        const currentCarMarca = db_res.rows[0].marca;
-
-        // Define qual dado será adicionado no banco, caso tenha um valor no primeiro parâmetro
-        // ou seja, se foi enviado um parâmetro na requisição esse será o valor a ser adicionado, 
-        // caso não tenha sido enviado nenhum valor, o valor a ser adicionado, será o valor atual,
-        // ou seja, o mesmo valor que já está no banco 
-        const updatedCarName =  car_name || currentCarName;
-        const updatedCarMarca = marca || currentCarMarca;
-
-        pool.query('UPDATE cars SET car_name = $1, marca = $2 WHERE car_id = $3 RETURNING *', [updatedCarName, updatedCarMarca, car_id], (db_err, db_res) => {
-            if(db_err)
+    if(car_name == null || car_name == "")
+    {
+        res.status(500).json({error: 'car_name was not given'});
+        console.error("Error: ", db_err);
+    }
+    else
+    {
+        // Verifica se o item existe, se existir, pega as informações dele
+        pool.query('SELECT * FROM cars WHERE car_id = $1', [car_id], (db_err, db_res) => {
+            if (db_err) 
             {
+                
                 console.error("Error: ", db_err);
-                return res.status(500).json({erro: 'Error updating'});
+                res.status(500).json({ error: 'Database error' });
             }
-            res.json(db_res.rows[0]);
+            if (db_res.rows.length === 0) 
+            {
+                res.status(404).json({ message: 'Car not found' });
+                console.log(car_id);
+            } 
+            
+            // Pega o nome e marca do carro que estão no banco
+            const currentCarName = db_res.rows[0].car_name;
+            const currentCarMarca = db_res.rows[0].marca;
+
+            // Define qual dado será adicionado no banco, caso tenha um valor no primeiro parâmetro
+            // ou seja, se foi enviado um parâmetro na requisição esse será o valor a ser adicionado, 
+            // caso não tenha sido enviado nenhum valor, o valor a ser adicionado, será o valor atual,
+            // ou seja, o mesmo valor que já está no banco 
+            const updatedCarName =  car_name || currentCarName;
+            const updatedCarMarca = marca || currentCarMarca;
+
+            pool.query('UPDATE cars SET car_name = $1, marca = $2 WHERE car_id = $3 RETURNING *', [updatedCarName, updatedCarMarca, car_id], (db_err, db_res) => {
+                if(db_err)
+                {
+                    console.error("Error: ", db_err);
+                    return res.status(500).json({erro: 'Error updating'});
+                }
+                res.json(db_res.rows[0]);
+            });
         });
-    }); 
+    }
 });
 
 // Rota para deletar
