@@ -67,11 +67,13 @@ router.get('/readCar/:car_id', (req, res) => {
 
 // Rota para atualizar
 router.put('/updateCar/:car_id', (req, res) => {
-    // Pega os parâmetros que vieram no JSON da requisição
+    // Pega os parâmetros que vieram no JSON e na URL da requisição
+    // URL
     const { car_id } = req.params;
+    //JSON
     const { car_name, marca } = req.body;
 
-    // Verificar se o item existe, se existir, pega as informações dele
+    // Verifica se o item existe, se existir, pega as informações dele
     pool.query('SELECT * FROM cars WHERE car_id = $1', [car_id], (db_err, db_res) => {
         if (db_err) 
         {
@@ -84,12 +86,12 @@ router.put('/updateCar/:car_id', (req, res) => {
             console.log(car_id);
         } 
         
-        // Pega o nome  e marca do carro que está no banco
+        // Pega o nome e marca do carro que estão no banco
         const currentCarName = db_res.rows[0].car_name;
         const currentCarMarca = db_res.rows[0].marca;
 
         // Define qual dado será adicionado no banco, caso tenha um valor no primeiro parâmetro
-        // ou seja, foi enviado um parâmetro na requisição esse será o valor a ser adicionado, 
+        // ou seja, se foi enviado um parâmetro na requisição esse será o valor a ser adicionado, 
         // caso não tenha sido enviado nenhum valor, o valor a ser adicionado, será o valor atual,
         // ou seja, o mesmo valor que já está no banco 
         const updatedCarName =  car_name || currentCarName;
