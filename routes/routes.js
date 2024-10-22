@@ -3,7 +3,7 @@ import express from 'express';
 const router = express.Router();
 
 // Rota padrão
-router.get('/', (res) => {
+router.get('/teste', (req, res) => {
     res.send("Hello World");
 });
 
