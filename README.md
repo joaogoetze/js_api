@@ -1,7 +1,8 @@
-Basic API done with JS, Node JS to be more specific. I use a Postgres local DB.
+Basic API built with JavaScript, specifically with Node.js. I use a local PostgreSQL database.
 
 Libraries used:
-- pg (db connection)
-- pool from pg (create a db connection object)
-- express (routes)
-- cors (nedded to can use this api from other local project)
+
+pg (database connection)
+Pool from pg (to create a database connection pool)
+express (for routing)
+cors (required to allow this API to be used by other local projects)
